@@ -5,12 +5,19 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathDashPathEffect;
 import android.graphics.PathEffect;
+import android.graphics.RadialGradient;
 import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.SweepGradient;
 import android.view.View;
 
 /**
@@ -89,7 +96,34 @@ public class MyView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        drawPathEffect(canvas);
+        drawColorFilter(canvas);
+    }
+
+    private void drawColorFilter(Canvas canvas) {
+        ColorMatrix cm = new ColorMatrix();
+        cm.setSaturation(0);
+        ColorFilter filter = new ColorMatrixColorFilter(cm);
+        mPaint.setColorFilter(filter);
+        canvas.drawBitmap(mBitmap, 100, 100, mPaint);
+    }
+
+    private void drawShader(Canvas canvas) {
+        int[] colors = {Color.RED, Color.GREEN, Color.BLUE};
+        float[] positions = {0, 0.3f, 1};
+        Shader shader = new LinearGradient(100, 100, 300, 300, colors, positions, Shader.TileMode.REPEAT);
+        mPaint.setShader(shader);
+
+        canvas.drawRect( 0, 0, 300, 300, mPaint);
+//        canvas.drawRect(100, 100, 300, 300, mPaint);
+
+        shader = new RadialGradient(200, 500, 100, Color.RED, Color.BLUE, Shader.TileMode.CLAMP);
+        mPaint.setShader(shader);
+        canvas.drawCircle(200, 500, 100, mPaint);
+
+        int[] sweeps = {Color.RED, Color.BLUE, Color.RED};
+        shader = new SweepGradient(200, 800, sweeps, null);
+        mPaint.setShader(shader);
+        canvas.drawCircle( 200, 800, 100, mPaint);
     }
 
 
