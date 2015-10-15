@@ -1,6 +1,7 @@
 package com.example.dongja94.samplegraphics;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -18,6 +19,8 @@ import android.graphics.RadialGradient;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
+import android.graphics.drawable.Drawable;
+import android.util.AttributeSet;
 import android.view.View;
 
 /**
@@ -25,8 +28,23 @@ import android.view.View;
  */
 public class MyView extends View {
     public MyView(Context context) {
-        super(context);
+        this(context, null);
+    }
+
+    public MyView(Context context, AttributeSet attrs) {
+        super(context, attrs);
         init();
+
+        if (attrs != null) {
+            TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.MyView);
+            Drawable d = ta.getDrawable(R.styleable.MyView_image);
+            int id = ta.getResourceId(R.styleable.MyView_image, -1);
+            if (id != -1) {
+                mBitmap = BitmapFactory.decodeResource(getResources(), id);
+            }
+
+            ta.recycle();
+        }
     }
 
     Paint mPaint;
@@ -93,6 +111,11 @@ public class MyView extends View {
         mMatrix.reset();
     }
 
+    public void setBitmap(Bitmap bitmap) {
+        mBitmap = bitmap;
+        invalidate();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -104,7 +127,7 @@ public class MyView extends View {
         cm.setSaturation(0);
         ColorFilter filter = new ColorMatrixColorFilter(cm);
         mPaint.setColorFilter(filter);
-        canvas.drawBitmap(mBitmap, 100, 100, mPaint);
+        canvas.drawBitmap(mBitmap, 0, 0, mPaint);
     }
 
     private void drawShader(Canvas canvas) {
