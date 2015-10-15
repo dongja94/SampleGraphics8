@@ -21,6 +21,9 @@ import android.graphics.Shader;
 import android.graphics.SweepGradient;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 
 /**
@@ -30,6 +33,7 @@ public class MyView extends View {
     public MyView(Context context) {
         this(context, null);
     }
+
 
     public MyView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -47,12 +51,53 @@ public class MyView extends View {
         }
     }
 
+    GestureDetector mDetector;
+    ScaleGestureDetector mScaleDetector;
+
     Paint mPaint;
     private void init() {
         mPaint = new Paint();
         makeLinePoint();
         makePath();
         makeBitmap();
+
+        mM = new Matrix();
+        mM.reset();
+
+        mDetector = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener(){
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                mM.postTranslate(-distanceX, -distanceY);
+                invalidate();
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                float x = e.getX();
+                float y = e.getY();
+                mM.postScale(2, 2, x, y);
+                invalidate();
+                return true;
+            }
+        });
+
+        mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleGestureDetector.SimpleOnScaleGestureListener(){
+            @Override
+            public boolean onScale(ScaleGestureDetector detector) {
+                float factor = detector.getScaleFactor();
+                float x = detector.getFocusX();
+                float y = detector.getFocusY();
+                mM.postScale(factor,factor, x, y);
+                invalidate();
+                return true;
+            }
+        });
     }
 
     private static final float LINE_LENGTH = 300;
@@ -130,6 +175,8 @@ public class MyView extends View {
 
     int mX, mY;
 
+    Matrix mM;
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
@@ -137,6 +184,15 @@ public class MyView extends View {
         mX = getPaddingLeft() + (width - mBitmap.getWidth()) / 2;
         int height = bottom - top - getPaddingBottom() - getPaddingTop();
         mY = getPaddingTop() + (height - mBitmap.getHeight()) / 2;
+
+        mM.setTranslate(mX,mY);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        boolean consumed = mDetector.onTouchEvent(event);
+        consumed = consumed || mScaleDetector.onTouchEvent(event);
+        return consumed || super.onTouchEvent(event);
     }
 
     @Override
@@ -151,7 +207,7 @@ public class MyView extends View {
         cm.setSaturation(0);
         ColorFilter filter = new ColorMatrixColorFilter(cm);
         mPaint.setColorFilter(filter);
-        canvas.drawBitmap(mBitmap, mX, mY, mPaint);
+        canvas.drawBitmap(mBitmap, mM, mPaint);
     }
 
     private void drawShader(Canvas canvas) {
