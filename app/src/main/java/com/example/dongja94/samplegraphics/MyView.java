@@ -8,6 +8,8 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PathDashPathEffect;
+import android.graphics.PathEffect;
 import android.graphics.RectF;
 import android.view.View;
 
@@ -45,6 +47,7 @@ public class MyView extends View {
     Path mPath;
 
     Path mTextPath;
+    Path arrowPath;
 
     private void makePath() {
         mPath = new Path();
@@ -61,6 +64,14 @@ public class MyView extends View {
         mTextPath = new Path();
 
         mTextPath.addCircle(400, 400, 100, Path.Direction.CW);
+
+        arrowPath = new Path();
+        arrowPath.moveTo(0,0);
+        arrowPath.lineTo(-5, -5);
+        arrowPath.lineTo(0, -5);
+        arrowPath.lineTo(5, 0);
+        arrowPath.lineTo(0, 5);
+        arrowPath.lineTo(-5,5);
     }
 
     Bitmap mBitmap;
@@ -78,7 +89,34 @@ public class MyView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        drawBitmap(canvas);
+        drawPathEffect(canvas);
+    }
+
+
+    private void drawPathEffect(Canvas canvas) {
+        mPaint.setStyle(Paint.Style.STROKE);
+        mPaint.setStrokeWidth(10);
+        mPaint.setAntiAlias(true);
+
+        float[] intervals = {20, 10, 30, 10, 10, 10};
+//        PathEffect effect = new DashPathEffect(intervals, 10);
+        PathEffect effect = new PathDashPathEffect(arrowPath, 10, 0, PathDashPathEffect.Style.ROTATE);
+        mPaint.setPathEffect(effect);
+        canvas.drawPath(mPath, mPaint);
+    }
+
+    private void drawStroke(Canvas canvas) {
+        mPaint.setColor(Color.BLUE);
+
+        canvas.drawRect(100, 100, 300, 300, mPaint);
+
+        mPaint.setStyle(Paint.Style.STROKE);
+
+        canvas.drawRect(100, 400, 300, 600, mPaint);
+
+        mPaint.setStyle(Paint.Style.FILL);
+
+        canvas.drawRect(100, 700, 300, 900, mPaint);
     }
 
     private void drawBitmap(Canvas canvas) {
