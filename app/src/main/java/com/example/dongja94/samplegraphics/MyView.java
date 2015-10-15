@@ -113,7 +113,30 @@ public class MyView extends View {
 
     public void setBitmap(Bitmap bitmap) {
         mBitmap = bitmap;
+        requestLayout();
         invalidate();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int width = mBitmap.getWidth() + getPaddingLeft() + getPaddingRight();
+        int height = mBitmap.getHeight() + getPaddingTop() + getPaddingBottom();
+
+        width = resolveSize(width, widthMeasureSpec);
+        height = resolveSize(height, heightMeasureSpec);
+
+        setMeasuredDimension(width, height);
+    }
+
+    int mX, mY;
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        int width = right - left - getPaddingLeft() - getPaddingRight();
+        mX = getPaddingLeft() + (width - mBitmap.getWidth()) / 2;
+        int height = bottom - top - getPaddingBottom() - getPaddingTop();
+        mY = getPaddingTop() + (height - mBitmap.getHeight()) / 2;
     }
 
     @Override
@@ -123,11 +146,12 @@ public class MyView extends View {
     }
 
     private void drawColorFilter(Canvas canvas) {
+        canvas.drawColor(Color.DKGRAY);
         ColorMatrix cm = new ColorMatrix();
         cm.setSaturation(0);
         ColorFilter filter = new ColorMatrixColorFilter(cm);
         mPaint.setColorFilter(filter);
-        canvas.drawBitmap(mBitmap, 0, 0, mPaint);
+        canvas.drawBitmap(mBitmap, mX, mY, mPaint);
     }
 
     private void drawShader(Canvas canvas) {

@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.photo2);
+                Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.sample_0);
                 myView.setBitmap(bm);
             }
         });
